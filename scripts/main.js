@@ -1,0 +1,1 @@
+whenDetailedVideoPreviewIsOpened(showVideoRatings);

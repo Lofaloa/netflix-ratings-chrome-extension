@@ -1,14 +1,15 @@
-function OpenMovieDatabaseQuery(apiKey, title, year) {
-
+function OpenMovieDatabaseQuery(apiKey, title, year = undefined, type = "movie") {
     this.apiKey = apiKey;
     this.title = title;
     this.year = year;
-
     this.toURLString = () => {
         const omdbURL = new URL("https://www.omdbapi.com");
         omdbURL.searchParams.append("apiKey", this.apiKey);
         omdbURL.searchParams.append("t", this.title);
-        omdbURL.searchParams.append("y", this.year);
+        omdbURL.searchParams.append("type", type);
+        if (year) {
+            omdbURL.searchParams.append("y", this.year);
+        }
         return omdbURL.toString();
     };
 };
