@@ -1,5 +1,3 @@
-
-
 // // const readVideoTitleFromPreviewDialogElement = (element) => {
 // //     const videoTitleLogoElements = element.querySelectorAll("previewModal--player-titleTreatment-logo");
 // //     if (videoTitleLogoElements.length > 0) {
@@ -75,3 +73,11 @@ const config = {
 
 const observer = new MutationObserver(handleDocumentBodyMutations);
 observer.observe(mainViewNode, config);
+
+
+const setup = async () => {
+    const value = await fetchMovieByTitleAndYear("Men in black", 1997);
+    console.log(value);
+};
+
+setup();
