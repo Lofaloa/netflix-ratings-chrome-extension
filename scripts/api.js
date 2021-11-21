@@ -40,7 +40,7 @@ const handleOpenMovieDatabaseResponse = async (response) => {
 
 const fetchMovieByTitleAndYear = async (title, year) => {
     try {
-        const query = new OpenMovieDatabaseQuery("key", title, year);
+        const query = new OpenMovieDatabaseQuery("<secret-key>", title, year);
         const response = await fetch(query.toURLString());
         return handleOpenMovieDatabaseResponse(response);
     } catch (error) {

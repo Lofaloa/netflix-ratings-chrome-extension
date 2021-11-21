@@ -1,3 +1,29 @@
+const INTERNET_MOVIE_DATABASE = {
+    sourceName: "Internet Movie Database",
+    iconURL: "assets/imdb_logo.svg",
+    iconAlt: "IMDb Icon",
+    title: "Open the Internet Movie Database in a new tab.",
+    open: (imdbId) => {
+        window.open(`https://www.imdb.com/title/${imdbId}`, '_blank').focus();
+    }
+};
+
+const ROTTEN_TOMATOES = {
+    sourceName: "Rotten Tomatoes",
+    iconURL: "assets/rotten_tomatoes_logo.png",
+    iconAlt: "Rotten Tomatoes Icon",
+    title: "Open Rotten Tomatoes in a new tab."
+};
+
+const METACRITIC = {
+    sourceName: "Metacritic",
+    iconURL: "assets/metacritic_logo.svg",
+    iconAlt: "Metacritic Icon",
+    title: "Open Metacritic in a new tab."
+};
+
+const ROW_ELEMENT_STYLE = "display: flex; flex-direction: row; gap: .5em; align-items: center;";
+
 const readTitleFromDetailedVideoPreview = () => {
     const videoTitleLogoElements = document.getElementsByClassName("previewModal--player-titleTreatment-logo");
     if (videoTitleLogoElements.length > 0) {
@@ -50,47 +76,49 @@ const makeRatingValueElement = (value) => {
     return ratingValueElement;
 };
 
-const makeRatingElement = (logoURLString, alt, value) => {
-    const rating = document.createElement("span");
-    const ratingIcon = makeRatingIconElement(logoURLString, alt);
-    const ratingValue = makeRatingValueElement(value);
-    rating.appendChild(ratingIcon);
-    rating.appendChild(ratingValue);
-    rating.style = "display: flex; flex-direction: row; gap: .5em; align-items: center;";
-    return rating;
-};
+const makeRatingElement = (rating, videoMetadata, sourceWebsite) => {
+    const ratingElement = document.createElement("span");
+    const ratingIcon = makeRatingIconElement(sourceWebsite.iconURL, sourceWebsite.iconAlt);
+    const ratingValue = makeRatingValueElement(rating.Value);
+    ratingElement.appendChild(ratingIcon);
+    ratingElement.appendChild(ratingValue);
+    ratingElement.style = ROW_ELEMENT_STYLE + " cursor: pointer;";
 
-const makeRatingElementFor = (rating) => {
-    let ratingElement = null;
-    if (rating.Source === "Internet Movie Database") {
-        ratingElement = makeRatingElement("assets/imdb_logo.svg", "IMDb Logo", rating.Value);
-    } else if (rating.Source === "Rotten Tomatoes") {
-        ratingElement = makeRatingElement("assets/rotten_tomatoes_logo.png", "Rotten Tomatoes Logo", rating.Value);
-    } else if (rating.Source === "Metacritic") {
-        ratingElement = makeRatingElement("assets/metacritic_logo.svg", "Metacritic Logo", rating.Value);
+    if (sourceWebsite.open) {
+        ratingElement.title = sourceWebsite.title;
+        ratingElement.addEventListener("click", () => {
+            sourceWebsite.open(videoMetadata.imdbID);
+        });
     }
+
     return ratingElement;
 };
 
+const makeRatingElementFor = (rating, videoMetadata) => {
+    let sourceWebsite = null;
+    switch (rating.Source) {
+        case INTERNET_MOVIE_DATABASE.sourceName:
+            sourceWebsite = INTERNET_MOVIE_DATABASE;
+            break;
+        case ROTTEN_TOMATOES.sourceName:
+            sourceWebsite = ROTTEN_TOMATOES;
+            break;
+        case METACRITIC.sourceName:
+            sourceWebsite = METACRITIC;
+            break;
+    }
+    return makeRatingElement(rating, videoMetadata, sourceWebsite);
+};
+
 const appendRatingsToVideoMetadata = (metadata) => {
-    const elements = document.getElementsByClassName("videoMetadata--container");
-
-
-    if (metadata.Ratings.length > 0) {
-
+    const videoMetadata = document.getElementsByClassName("videoMetadata--container");
+    if (videoMetadata.length > 0 && metadata.Ratings.length > 0) {
         const thirdLine = document.createElement("div");
-        thirdLine.className = "videoMetaData--third-line";
-        
-        thirdLine.style = "display: flex; flex-direction: row; gap: .5em; align-items: center;";
-
+        thirdLine.style = ROW_ELEMENT_STYLE;
         metadata.Ratings.forEach(rating => {
-            thirdLine.appendChild(makeRatingElementFor(rating));
+            thirdLine.appendChild(makeRatingElementFor(rating, metadata));
         });
-
-        if (elements.length > 0) {
-            elements[0].appendChild(thirdLine);
-        }
-
+        videoMetadata[0].appendChild(thirdLine);
     }
 
 };
@@ -98,23 +126,11 @@ const appendRatingsToVideoMetadata = (metadata) => {
 const showVideoRatings = async () => {
     const videoTitle = readTitleFromDetailedVideoPreview();
     let releaseYear = readYearFromDetailedVideoPreview();
-
-    console.log("Info are title is '", videoTitle, "' and year is '", releaseYear, ".");
-
     if (videoTitle !== null && releaseYear !== null) {
-        console.log("About to request medata data to OMDB...");
-
         const value = await fetchMovieByTitleAndYear(videoTitle, releaseYear);
-    
-        if (value === null) {
-            console.log("No metadata was found for ", videoTitle);
-        } else {
+        if (value !== null) {
             appendRatingsToVideoMetadata(value);
+
         }
-    
-    } else {
-        console.error("Failed to parse information from the preview.");
     }
-
 };
-
