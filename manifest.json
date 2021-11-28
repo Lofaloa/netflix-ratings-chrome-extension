@@ -7,10 +7,7 @@
       {
         "matches": [ "https://www.netflix.com/*" ],
         "js": [
-          "scripts/api.js",
-          "scripts/ratings.js",
-          "scripts/events.js",
-          "scripts/main.js"
+          "build/extension.js"
         ]
       }
     ],
